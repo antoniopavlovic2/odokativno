@@ -1,7 +1,5 @@
-
 <template>
   <v-app>
-
     <AppHeader
       @rules="rules = true"
       @statistics="statistics = true"
@@ -11,6 +9,7 @@
     <v-main>
       <router-view v-slot="{ Component }">
         <component
+          v-if="Component"
           :is="Component"
           @rules="rules = true"
         />
@@ -26,7 +25,6 @@
     <!-- Pravila igre -->
     <v-dialog v-model="rules" max-width="480">
       <v-card class="dialog-card pa-6">
-
         <div class="dialog-heading">
           <h2>Kako se igra?</h2>
 
@@ -59,14 +57,12 @@
         >
           JASNO!
         </v-btn>
-
       </v-card>
     </v-dialog>
 
     <!-- Statistika -->
     <v-dialog v-model="statistics" max-width="420">
       <v-card class="dialog-card pa-6 text-center">
-
         <v-icon
           icon="mdi-chart-bar"
           size="48"
@@ -88,14 +84,12 @@
         >
           Zatvori
         </v-btn>
-
       </v-card>
     </v-dialog>
 
     <!-- Rang-lista -->
     <v-dialog v-model="leaderboard" max-width="420">
       <v-card class="dialog-card pa-6 text-center">
-
         <v-icon
           icon="mdi-trophy-outline"
           size="48"
@@ -116,10 +110,8 @@
         >
           Zatvori
         </v-btn>
-
       </v-card>
     </v-dialog>
-
   </v-app>
 </template>
 
@@ -137,6 +129,7 @@ const gameRules = [
   'Odaberi raspon u kojem misliš da se nalazi točan odgovor.',
   'Što je raspon uži, više bodova možeš osvojiti.',
   'Ako je odgovor izvan tvog raspona, ne osvajaš bodove.',
+  'Za svako pitanje imaš 20 sekundi. Ako ne potvrdiš procjenu na vrijeme, osvajaš 0 bodova.',
 ]
 </script>
 

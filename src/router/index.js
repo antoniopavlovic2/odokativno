@@ -1,6 +1,8 @@
-
 import { createRouter, createWebHistory } from 'vue-router'
+
 import HomeView from '@/views/HomeView.vue'
+import GameView from '@/views/GameView.vue'
+import ResultsView from '@/views/ResultsView.vue'
 
 const routes = [
   {
@@ -9,66 +11,78 @@ const routes = [
     component: HomeView,
     meta: {
       title: 'Odokativno – Besplatni dnevni kviz procjenjivanja',
-      description:
-        'Zaigraj Odokativno, besplatni dnevni kviz na hrvatskom jeziku. Procijeni odgovore na 7 zanimljivih pitanja i testiraj svoj osjećaj za brojke.',
+      description: 'Zaigraj Odokativno, besplatni dnevni kviz na hrvatskom jeziku. Procijeni odgovore na 7 zanimljivih pitanja i testiraj svoj osjećaj za brojke.',
       robots: 'index, follow',
     },
   },
-
+  {
+    path: '/igra',
+    name: 'game',
+    component: GameView,
+    meta: {
+      title: 'Dnevni izazov | Odokativno',
+      description: 'Zaigraj današnji izazov i procijeni odgovore na sedam zanimljivih pitanja.',
+      robots: 'noindex, follow',
+    },
+  },
+  {
+    path: '/rezultati',
+    name: 'results',
+    component: ResultsView,
+    meta: {
+      title: 'Tvoj rezultat | Odokativno',
+      description: 'Pogledaj svoj rezultat dnevnog kviza Odokativno.',
+      robots: 'noindex, follow',
+    },
+  },
   {
     path: '/prijava',
     name: 'login',
     component: () => import('@/views/auth/LoginView.vue'),
     meta: {
       title: 'Prijava | Odokativno',
-      description:
-        'Prijavi se na svoj Odokativno račun.',
+      description: 'Prijavi se na svoj Odokativno račun.',
       robots: 'noindex, follow',
     },
   },
-
   {
     path: '/registracija',
     name: 'register',
     component: () => import('@/views/auth/RegisterView.vue'),
     meta: {
       title: 'Registracija | Odokativno',
-      description:
-        'Kreiraj svoj besplatni Odokativno račun.',
+      description: 'Kreiraj besplatan Odokativno račun i prati svoje rezultate.',
       robots: 'noindex, follow',
     },
   },
-
   {
     path: '/zaboravljena-lozinka',
     name: 'forgot-password',
-    component: () =>
-      import('@/views/auth/ForgotPasswordView.vue'),
+    component: () => import('@/views/auth/ForgotPasswordView.vue'),
     meta: {
       title: 'Zaboravljena lozinka | Odokativno',
-      description:
-        'Zatraži poveznicu za oporavak svog računa.',
+      description: 'Zatraži poveznicu za obnovu lozinke.',
       robots: 'noindex, follow',
     },
   },
-
   {
     path: '/nova-lozinka',
     name: 'reset-password',
-    component: () =>
-      import('@/views/auth/ResetPasswordView.vue'),
+    component: () => import('@/views/auth/ResetPasswordView.vue'),
     meta: {
       title: 'Nova lozinka | Odokativno',
-      description:
-        'Postavi novu lozinku za svoj Odokativno račun.',
+      description: 'Postavi novu lozinku za svoj račun.',
       robots: 'noindex, follow',
     },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-
   routes,
 
   scrollBehavior(to, from, savedPosition) {
@@ -77,17 +91,15 @@ const router = createRouter({
 })
 
 function setMeta(name, content) {
-  let element = document.querySelector(
-    `meta[name="${name}"]`
-  )
+  let tag = document.querySelector(`meta[name="${name}"]`)
 
-  if (!element) {
-    element = document.createElement('meta')
-    element.setAttribute('name', name)
-    document.head.appendChild(element)
+  if (!tag) {
+    tag = document.createElement('meta')
+    tag.setAttribute('name', name)
+    document.head.appendChild(tag)
   }
 
-  element.setAttribute('content', content)
+  tag.setAttribute('content', content)
 }
 
 router.afterEach((to, from, failure) => {
@@ -95,15 +107,8 @@ router.afterEach((to, from, failure) => {
 
   document.title = to.meta.title || 'Odokativno'
 
-  setMeta(
-    'description',
-    to.meta.description || 'Besplatni dnevni kviz.'
-  )
-
-  setMeta(
-    'robots',
-    to.meta.robots || 'noindex, follow'
-  )
+  setMeta('description', to.meta.description || '')
+  setMeta('robots', to.meta.robots || 'index, follow')
 })
 
 export default router

@@ -1,18 +1,36 @@
+
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
 import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
-import { loadFonts } from './plugins/webfontloader'
-import { createPinia } from 'pinia'
+
+import { useSettingsStore } from '@/stores/settingsStore'
+
 import '@fontsource/space-grotesk/400.css'
 import '@fontsource/space-grotesk/500.css'
 import '@fontsource/space-grotesk/600.css'
 import '@fontsource/space-grotesk/700.css'
 
-loadFonts()
+const app = createApp(App)
+const pinia = createPinia()
 
-createApp(App)
-  .use(router)
-  .use(vuetify)
-  .use(createPinia())
-  .mount('#app')
+app.use(pinia)
+app.use(vuetify)
+app.use(router)
+
+const settingsStore = useSettingsStore(pinia)
+
+// Aktivacija zvuka nakon korisničkog klika.
+window.addEventListener(
+  'click',
+  () => {
+    if (settingsStore.soundEnabled) {
+      settingsStore.unlockSound()
+    }
+  },
+  { capture: true }
+)
+
+app.mount('#app')

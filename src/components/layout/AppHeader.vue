@@ -1,8 +1,6 @@
-
 <template>
   <header class="site-header">
     <v-container class="header-container">
-
       <router-link
         to="/"
         class="brand"
@@ -16,14 +14,17 @@
         class="desktop-nav d-none d-lg-flex"
         aria-label="Glavna navigacija"
       >
-        <v-btn variant="text" @click="$emit('rules')">
+        <v-btn
+          variant="text"
+          @click="emit('rules')"
+        >
           Kako se igra?
         </v-btn>
 
         <v-btn
           variant="text"
           prepend-icon="mdi-trophy-outline"
-          @click="$emit('leaderboard')"
+          @click="emit('leaderboard')"
         >
           Rang-lista
         </v-btn>
@@ -31,10 +32,30 @@
         <v-btn
           variant="text"
           prepend-icon="mdi-chart-bar"
-          @click="$emit('statistics')"
+          @click="emit('statistics')"
         >
           Statistika
         </v-btn>
+
+        <v-btn
+          :icon="
+            settingsStore.soundEnabled
+              ? 'mdi-volume-high'
+              : 'mdi-volume-off'
+          "
+          :aria-label="
+            settingsStore.soundEnabled
+              ? 'Isključi zvuk'
+              : 'Uključi zvuk'
+          "
+          :title="
+            settingsStore.soundEnabled
+              ? 'Isključi zvuk'
+              : 'Uključi zvuk'
+          "
+          variant="text"
+          @click="settingsStore.toggleSound()"
+        />
 
         <v-divider vertical class="mx-2" />
 
@@ -59,6 +80,26 @@
       <!-- Mobilna navigacija -->
       <div class="d-flex d-lg-none">
         <v-btn
+          :icon="
+            settingsStore.soundEnabled
+              ? 'mdi-volume-high'
+              : 'mdi-volume-off'
+          "
+          :aria-label="
+            settingsStore.soundEnabled
+              ? 'Isključi zvuk'
+              : 'Uključi zvuk'
+          "
+          :title="
+            settingsStore.soundEnabled
+              ? 'Isključi zvuk'
+              : 'Uključi zvuk'
+          "
+          variant="text"
+          @click="settingsStore.toggleSound()"
+        />
+
+        <v-btn
           to="/prijava"
           icon="mdi-account-outline"
           variant="text"
@@ -72,7 +113,6 @@
           @click="menu = true"
         />
       </div>
-
     </v-container>
   </header>
 
@@ -153,6 +193,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useSettingsStore } from '@/stores/settingsStore'
+
+const settingsStore = useSettingsStore()
 
 const menu = ref(false)
 

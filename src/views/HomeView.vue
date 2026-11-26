@@ -1,22 +1,10 @@
-
 <template>
   <div class="home-page">
-
-    <!-- ========================================
-         HERO SECTION
-    ========================================= -->
-
-    <section
-      class="hero-section"
-      aria-labelledby="hero-title"
-    >
+    <section class="hero-section" aria-labelledby="hero-title">
       <v-container class="content-container">
         <v-row align="center" class="hero-row">
-
-          <!-- Lijeva strana -->
           <v-col cols="12" md="6">
             <div class="hero-content">
-
               <img
                 :src="logo"
                 alt="Odokativno – oko i mjerno ravnalo"
@@ -42,19 +30,15 @@
                 Besplatni dnevni kviz procjenjivanja
                 na hrvatskom jeziku.
               </p>
-
             </div>
           </v-col>
 
-          <!-- Desna strana -->
           <v-col cols="12" md="6">
             <div class="challenge-wrapper">
-
               <section
                 class="daily-challenge"
                 aria-labelledby="challenge-title"
               >
-
                 <div class="challenge-top">
                   <span
                     class="daily-indicator"
@@ -83,7 +67,6 @@
                 </p>
 
                 <div class="challenge-info">
-
                   <span>
                     <v-icon
                       icon="mdi-help-circle-outline"
@@ -106,24 +89,21 @@
                     />
                     3 minute
                   </span>
-
                 </div>
-
               </section>
 
-              <!-- Gumb za pokretanje igre -->
               <v-btn
                 block
                 color="primary"
                 height="64"
+                elevation="0"
                 class="play-button"
                 append-icon="mdi-arrow-right"
                 @click="startGame"
               >
-                ZAIGRAJ
+                {{ playButtonText }}
               </v-btn>
 
-              <!-- Pravila igre -->
               <v-btn
                 block
                 variant="text"
@@ -137,25 +117,15 @@
               <p class="free-label">
                 Besplatno. Bez obavezne registracije.
               </p>
-
             </div>
           </v-col>
-
         </v-row>
       </v-container>
     </section>
 
-    <!-- ========================================
-         ZNAČAJKE IGRE
-    ========================================= -->
-
-    <section
-      class="features-section"
-      aria-label="Značajke igre"
-    >
+    <section class="features-section" aria-label="Značajke igre">
       <v-container class="content-container">
         <v-row>
-
           <v-col
             v-for="feature in features"
             :key="feature.title"
@@ -163,7 +133,6 @@
             sm="4"
           >
             <article class="feature-card">
-
               <div class="feature-icon">
                 <v-icon
                   :icon="feature.icon"
@@ -173,28 +142,16 @@
               </div>
 
               <h2>{{ feature.title }}</h2>
-
               <p>{{ feature.description }}</p>
-
             </article>
           </v-col>
-
         </v-row>
       </v-container>
     </section>
 
-    <!-- ========================================
-         O IGRI / SEO SADRŽAJ
-    ========================================= -->
-
-    <section
-      class="about-section"
-      aria-labelledby="about-title"
-    >
+    <section class="about-section" aria-labelledby="about-title">
       <v-container class="content-container">
-
         <div class="about-content">
-
           <span class="section-label">
             MALO DRUGAČIJI KVIZ
           </span>
@@ -225,48 +182,28 @@
           >
             Saznaj kako se igra
           </v-btn>
-
         </div>
-
       </v-container>
     </section>
-
-    <!-- ========================================
-         PRIVREMENA OBAVIJEST
-    ========================================= -->
-
-    <v-snackbar
-      v-model="comingSoon"
-      color="secondary"
-      :timeout="3000"
-    >
-      Dnevni izazov stiže uskoro!
-
-      <template #actions>
-        <v-btn
-          variant="text"
-          icon="mdi-close"
-          aria-label="Zatvori obavijest"
-          @click="comingSoon = false"
-        />
-      </template>
-
-    </v-snackbar>
-
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { useGameStore } from '@/stores/gameStore'
+import { useSettingsStore } from '@/stores/settingsStore'
+import { getTodayDate } from '@/utils/date'
+
 import logo from '@/assets/logo.svg'
 
-// Događaji koje šaljemo prema App.vue
 const emit = defineEmits(['rules'])
 
-// Lokalno stanje početne stranice
-const comingSoon = ref(false)
+const router = useRouter()
+const gameStore = useGameStore()
+const settingsStore = useSettingsStore()
 
-// Značajke igre
 const features = [
   {
     icon: 'mdi-calendar-today',
@@ -288,17 +225,43 @@ const features = [
   },
 ]
 
-// Pokretanje dnevnog izazova
+const hasCurrentChallenge = computed(() => {
+  return (
+    gameStore.challenge?.date === getTodayDate() ||
+    (
+      process.env.NODE_ENV === 'development' &&
+      !!gameStore.challenge
+    )
+  )
+})
+
+const playButtonText = computed(() => {
+  if (hasCurrentChallenge.value) {
+    if (gameStore.isFinished) {
+      return 'POGLEDAJ REZULTAT'
+    }
+
+    if (gameStore.isPlaying || gameStore.isAnswered) {
+      return 'NASTAVI IGRU'
+    }
+  }
+
+  return 'ZAIGRAJ'
+})
+
 function startGame() {
-  comingSoon.value = true
+  settingsStore.unlockSound()
+
+  if (hasCurrentChallenge.value && gameStore.isFinished) {
+    router.push({ name: 'results' })
+    return
+  }
+
+  router.push({ name: 'game' })
 }
 </script>
 
 <style scoped>
-/* ========================================
-   GLOBAL
-======================================== */
-
 .home-page {
   --ink: #181818;
   --yellow: #facc15;
@@ -316,10 +279,6 @@ function startGame() {
   padding-left: 24px;
   padding-right: 24px;
 }
-
-/* ========================================
-   HERO SECTION
-======================================== */
 
 .hero-section {
   padding: 80px 0;
@@ -371,10 +330,6 @@ function startGame() {
   font-size: 13px;
   color: var(--muted);
 }
-
-/* ========================================
-   DAILY CHALLENGE
-======================================== */
 
 .challenge-wrapper {
   width: 100%;
@@ -451,10 +406,6 @@ function startGame() {
   background: #555;
 }
 
-/* ========================================
-   BUTTONS
-======================================== */
-
 .play-button {
   margin-top: 16px;
   border-radius: 16px;
@@ -485,10 +436,6 @@ function startGame() {
   color: var(--muted);
   margin-top: 4px;
 }
-
-/* ========================================
-   FEATURES SECTION
-======================================== */
 
 .features-section {
   border-top: 1px solid var(--line);
@@ -527,10 +474,6 @@ function startGame() {
   line-height: 1.6;
   color: var(--muted);
 }
-
-/* ========================================
-   ABOUT SECTION
-======================================== */
 
 .about-section {
   padding: 80px 0;
@@ -575,10 +518,6 @@ function startGame() {
   font-weight: 600;
 }
 
-/* ========================================
-   TABLET
-======================================== */
-
 @media (max-width: 959px) {
   .hero-section {
     padding: 40px 0;
@@ -600,10 +539,6 @@ function startGame() {
     padding: 56px 0;
   }
 }
-
-/* ========================================
-   MOBILE
-======================================== */
 
 @media (max-width: 599px) {
   .content-container {
@@ -660,10 +595,6 @@ function startGame() {
     padding: 20px 12px;
   }
 }
-
-/* ========================================
-   ACCESSIBILITY
-======================================== */
 
 @media (prefers-reduced-motion: reduce) {
   .play-button {
