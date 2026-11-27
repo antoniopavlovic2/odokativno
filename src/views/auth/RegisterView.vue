@@ -1,16 +1,12 @@
 
 <template>
   <AuthLayout
-    :title="
-      registrationComplete
-        ? 'Provjeri svoj e-mail!'
-        : 'Imaš dobro oko?'
-    "
-    :subtitle="
-      registrationComplete
-        ? 'Još samo jedan korak.'
-        : 'Kreiraj račun i pokaži koliko dobro procjenjuješ.'
-    "
+    :title="registrationComplete
+      ? 'Provjeri svoj e-mail!'
+      : 'Imaš dobro oko?'"
+    :subtitle="registrationComplete
+      ? 'Još samo jedan korak.'
+      : 'Kreiraj račun i pokaži koliko dobro procjenjuješ.'"
   >
     <div
       v-if="registrationComplete"
@@ -37,13 +33,13 @@
 
       <p class="text-body-2 my-5">
         Otvori poveznicu iz e-maila.
-        Nakon potvrde prijavi se ili otvori
-        Moj profil kako bi dovršio registraciju.
+        Nakon potvrde prijavi se ili
+        otvori Moj profil.
       </p>
 
       <p class="text-caption mb-5">
-        Ako ne vidiš poruku, provjeri
-        neželjenu poštu.
+        Ako ne vidiš poruku,
+        provjeri neželjenu poštu.
       </p>
 
       <v-btn
@@ -65,7 +61,6 @@
       <v-text-field
         v-model.trim="username"
         label="Korisničko ime"
-        name="username"
         autocomplete="username"
         prepend-inner-icon="mdi-account-outline"
         variant="outlined"
@@ -78,7 +73,6 @@
         v-model.trim="email"
         label="E-mail adresa"
         type="email"
-        name="email"
         autocomplete="email"
         prepend-inner-icon="mdi-email-outline"
         variant="outlined"
@@ -89,7 +83,6 @@
       <v-text-field
         v-model="password"
         label="Lozinka"
-        name="password"
         autocomplete="new-password"
         :type="showPassword ? 'text' : 'password'"
         prepend-inner-icon="mdi-lock-outline"
@@ -99,8 +92,12 @@
       >
         <template #append-inner>
           <v-btn
-            :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            :aria-label="showPassword ? 'Sakrij lozinku' : 'Prikaži lozinku'"
+            :icon="showPassword
+              ? 'mdi-eye-off'
+              : 'mdi-eye'"
+            :aria-label="showPassword
+              ? 'Sakrij lozinku'
+              : 'Prikaži lozinku'"
             variant="text"
             size="small"
             @click="showPassword = !showPassword"
@@ -111,7 +108,6 @@
       <v-text-field
         v-model="confirmPassword"
         label="Ponovi lozinku"
-        name="confirmPassword"
         autocomplete="new-password"
         :type="showPassword ? 'text' : 'password'"
         prepend-inner-icon="mdi-lock-check-outline"
@@ -124,6 +120,40 @@
         ]"
         class="mb-2"
       />
+
+      <v-checkbox
+        v-model="acceptedTerms"
+        color="secondary"
+        density="compact"
+        hide-details
+        class="terms-checkbox"
+      >
+        <template #label>
+          <span class="terms-label">
+            Prihvaćam
+            <router-link
+              to="/uvjeti-koristenja"
+              target="_blank"
+              rel="noopener noreferrer"
+              @click.stop
+            >
+              uvjete korištenja.
+            </router-link>
+          </span>
+        </template>
+      </v-checkbox>
+
+      <p class="privacy-notice mb-5">
+        Informacije o obradi tvojih osobnih
+        podataka dostupne su u našoj
+        <router-link
+          to="/politika-privatnosti"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          politici privatnosti.
+        </router-link>
+      </p>
 
       <v-alert
         v-if="authStore.errorMessage"
@@ -142,6 +172,7 @@
         elevation="0"
         class="font-weight-bold"
         :loading="authStore.loading"
+        :disabled="!acceptedTerms"
       >
         KREIRAJ RAČUN
       </v-btn>
@@ -175,7 +206,9 @@ const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+
 const showPassword = ref(false)
+const acceptedTerms = ref(false)
 const registrationComplete = ref(false)
 
 authStore.clearError()
@@ -183,7 +216,13 @@ authStore.clearError()
 async function submitRegister(event) {
   const { valid } = await event
 
-  if (!valid) return
+  if (
+    !valid ||
+    !acceptedTerms.value ||
+    authStore.loading
+  ) {
+    return
+  }
 
   const success = await authStore.register(
     username.value,
@@ -222,5 +261,25 @@ async function submitRegister(event) {
   display: block;
   overflow-wrap: anywhere;
   font-size: 16px;
+}
+
+.terms-label {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #181818;
+}
+
+.terms-label a,
+.privacy-notice a {
+  color: #181818;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.privacy-notice {
+  font-size: 12px;
+  color: #64635d;
+  line-height: 1.7;
 }
 </style>
