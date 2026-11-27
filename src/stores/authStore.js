@@ -21,14 +21,17 @@ function translateError(error) {
     same_password:
       'Nova lozinka mora se razlikovati od stare.',
 
+    captcha_failed:
+      'Sigurnosna provjera nije uspjela. Pokušaj ponovno.',
+
     over_email_send_rate_limit:
-      'Poslano je previše e-mail poruka. Pokušaj kasnije.',
+      'Poslano je previše e-mailova. Pokušaj kasnije.',
 
     over_request_rate_limit:
-      'Previše pokušaja. Pokušaj ponovno kasnije.',
+      'Previše pokušaja. Pokušaj kasnije.',
 
     email_address_not_authorized:
-      'Slanje poruka na ovu adresu još nije omogućeno.',
+      'Slanje poruka na ovu adresu nije omogućeno.',
 
     session_not_found:
       'Tvoja sesija je istekla. Prijavi se ponovno.',
@@ -36,8 +39,6 @@ function translateError(error) {
     otp_expired:
       'Poveznica je istekla. Zatraži novu.',
   }
-
-  console.warn('[AUTH]', error?.message)
 
   return (
     messages[error?.code] ||
@@ -70,7 +71,6 @@ export const useAuthStore = defineStore('auth', {
     userId: state =>
       state.user?.id || null,
 
-    // Kompatibilnost s postojećim obrascima.
     error: state =>
       state.errorMessage || state.successMessage,
   },
@@ -97,7 +97,17 @@ export const useAuthStore = defineStore('auth', {
       return true
     },
 
-    // Učitavanje sesije pri pokretanju aplikacije.
+    checkCaptcha(captchaToken) {
+      if (!captchaToken) {
+        this.errorMessage =
+          'Dovrši sigurnosnu provjeru.'
+
+        return false
+      }
+
+      return true
+    },
+
     initialize() {
       if (authSubscription) return
 
@@ -126,16 +136,20 @@ export const useAuthStore = defineStore('auth', {
       authSubscription = data.subscription
     },
 
-    // ==================================
     // REGISTRACIJA
-    // ==================================
 
-    async register(username, email, password) {
+    async register(
+      username,
+      email,
+      password,
+      captchaToken
+    ) {
       if (this.loading) return false
 
       this.clearError()
 
       if (!this.checkConnection()) return false
+      if (!this.checkCaptcha(captchaToken)) return false
 
       this.loading = true
 
@@ -146,6 +160,8 @@ export const useAuthStore = defineStore('auth', {
             password,
 
             options: {
+              captchaToken,
+
               data: {
                 username: username.trim(),
               },
@@ -161,27 +177,28 @@ export const useAuthStore = defineStore('auth', {
 
         this.successMessage = data.session
           ? 'Uspješno si kreirao račun!'
-          : 'Provjeri svoju e-mail adresu za poveznicu za potvrdu računa.'
+          : 'Provjeri svoj e-mail za potvrdu računa.'
 
         return true
+
       } catch (error) {
         this.errorMessage = translateError(error)
         return false
+
       } finally {
         this.loading = false
       }
     },
 
-    // ==================================
     // PRIJAVA
-    // ==================================
 
-    async login(email, password) {
+    async login(email, password, captchaToken) {
       if (this.loading) return false
 
       this.clearError()
 
       if (!this.checkConnection()) return false
+      if (!this.checkCaptcha(captchaToken)) return false
 
       this.loading = true
 
@@ -190,35 +207,41 @@ export const useAuthStore = defineStore('auth', {
           await supabase.auth.signInWithPassword({
             email: email.trim(),
             password,
+
+            options: {
+              captchaToken,
+            },
           })
 
         if (error) throw error
 
         this.setSession(data.session)
+
         this.isRecovery = false
 
         this.successMessage =
           'Uspješno si se prijavio!'
 
         return true
+
       } catch (error) {
         this.errorMessage = translateError(error)
         return false
+
       } finally {
         this.loading = false
       }
     },
 
-    // ==================================
     // ZABORAVLJENA LOZINKA
-    // ==================================
 
-    async forgotPassword(email) {
+    async forgotPassword(email, captchaToken) {
       if (this.loading) return false
 
       this.clearError()
 
       if (!this.checkConnection()) return false
+      if (!this.checkCaptcha(captchaToken)) return false
 
       this.loading = true
 
@@ -227,6 +250,8 @@ export const useAuthStore = defineStore('auth', {
           await supabase.auth.resetPasswordForEmail(
             email.trim(),
             {
+              captchaToken,
+
               redirectTo:
                 `${window.location.origin}/nova-lozinka`,
             }
@@ -238,17 +263,17 @@ export const useAuthStore = defineStore('auth', {
           'Ako račun postoji, primit ćeš e-mail s poveznicom za obnovu lozinke.'
 
         return true
+
       } catch (error) {
         this.errorMessage = translateError(error)
         return false
+
       } finally {
         this.loading = false
       }
     },
 
-    // ==================================
     // NOVA LOZINKA
-    // ==================================
 
     async resetPassword(password) {
       if (this.loading) return false
@@ -281,17 +306,17 @@ export const useAuthStore = defineStore('auth', {
           'Lozinka je uspješno promijenjena!'
 
         return true
+
       } catch (error) {
         this.errorMessage = translateError(error)
         return false
+
       } finally {
         this.loading = false
       }
     },
 
-    // ==================================
     // ODJAVA
-    // ==================================
 
     async logout() {
       if (this.loading) return false
@@ -314,9 +339,11 @@ export const useAuthStore = defineStore('auth', {
         this.isRecovery = false
 
         return true
+
       } catch (error) {
         this.errorMessage = translateError(error)
         return false
+
       } finally {
         this.loading = false
       }

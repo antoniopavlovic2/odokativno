@@ -22,7 +22,9 @@
       </header>
 
       <article class="legal-card">
+
         <!-- POLITIKA PRIVATNOSTI -->
+
         <template v-if="isPrivacy">
           <section>
             <h2>1. Voditelj obrade</h2>
@@ -70,6 +72,15 @@
               i tehnički podaci poput IP adrese,
               podataka o pregledniku i zapisa pristupa.
             </p>
+
+            <p>
+              Prilikom sigurnosne provjere putem
+              Cloudflare Turnstilea mogu se obrađivati
+              IP adresa, tehnički podaci o pregledniku
+              i sigurnosni signali uređaja potrebni
+              za razlikovanje stvarnih korisnika
+              od automatiziranih zahtjeva.
+            </p>
           </section>
 
           <section>
@@ -84,6 +95,8 @@
               <li>Obnove zaboravljene lozinke.</li>
               <li>Odgovaranja na korisničke zahtjeve.</li>
               <li>Sigurnosti i sprječavanja zlouporabe.</li>
+              <li>Sprječavanja automatiziranih registracija.</li>
+              <li>Zaštite od botova i neželjenih zahtjeva.</li>
             </ul>
 
             <p>
@@ -93,10 +106,11 @@
             </p>
 
             <p>
-              Obrada nužna za sigurnost usluge i
-              sprječavanje zlouporabe temelji se na
-              legitimnom interesu prema članku 6.
-              stavku 1. točki (f) GDPR-a.
+              Obrada nužna za sigurnost usluge,
+              zaštitu od botova i sprječavanje
+              zlouporabe temelji se na legitimnom
+              interesu prema članku 6. stavku 1.
+              točki (f) GDPR-a.
             </p>
 
             <p>
@@ -110,35 +124,60 @@
             <h2>4. Vanjski pružatelji usluga</h2>
 
             <p>
-              Za funkcioniranje aplikacije koristimo:
+              Za funkcioniranje aplikacije koristimo
+              sljedeće vanjske pružatelje usluga:
             </p>
 
             <ul>
               <li>
-                <a href="https://supabase.com/privacy"
-                   target="_blank"
-                   rel="noopener noreferrer">
+                <a
+                  href="https://supabase.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Supabase
                 </a>
-                – autentifikacija i baza podataka.
+                – autentifikacija korisnika
+                i baza podataka.
               </li>
 
               <li>
-                <a href="https://www.netlify.com/privacy/"
-                   target="_blank"
-                   rel="noopener noreferrer">
+                <a
+                  href="https://www.netlify.com/privacy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Netlify
                 </a>
-                – hosting web-aplikacije.
+                – hosting i isporuka web-aplikacije.
               </li>
 
               <li>
-                <a href="https://www.brevo.com/legal/privacypolicy/"
-                   target="_blank"
-                   rel="noopener noreferrer">
+                <a
+                  href="https://www.brevo.com/legal/privacypolicy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Brevo
                 </a>
-                – slanje transakcijskih e-mailova.
+                – slanje transakcijskih e-mailova,
+                uključujući potvrdu registracije
+                i obnovu lozinke.
+              </li>
+
+              <li>
+                <a
+                  href="https://www.cloudflare.com/turnstile-privacy-policy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Cloudflare Turnstile
+                </a>
+                – sigurnosna provjera namijenjena
+                razlikovanju stvarnih korisnika
+                od automatiziranih zahtjeva te
+                sprječavanju neželjenih registracija,
+                pokušaja prijave i drugih zlouporaba.
               </li>
             </ul>
 
@@ -148,14 +187,70 @@
             </p>
           </section>
 
+          <!-- CLOUDFLARE TURNSTILE -->
+
           <section>
-            <h2>5. Međunarodni prijenos podataka</h2>
+            <h2>5. Sigurnosna provjera i zaštita od botova</h2>
+
+            <p>
+              ODOKATIVNO. koristi Cloudflare Turnstile
+              radi zaštite korisničkih računa,
+              autentifikacijskog sustava i infrastrukture
+              od automatiziranih zahtjeva i zlouporaba.
+            </p>
+
+            <p>
+              Sigurnosna provjera primjenjuje se
+              prilikom:
+            </p>
+
+            <ul>
+              <li>Registracije korisničkog računa.</li>
+              <li>Prijave na korisnički račun.</li>
+              <li>Zahtjeva za obnovu lozinke.</li>
+              <li>Zahtjeva za brisanje računa.</li>
+            </ul>
+
+            <p>
+              Cloudflare Turnstile analizira tehničke
+              i sigurnosne signale kako bi procijenio
+              je li zahtjev poslala stvarna osoba
+              ili automatizirani sustav.
+            </p>
+
+            <p>
+              Ovu provjeru koristimo radi sigurnosti,
+              a ne za personalizirano oglašavanje
+              ili marketinško profiliranje korisnika.
+            </p>
+
+            <p>
+              Sigurnosna provjera nije potrebna
+              za uobičajeno igranje dnevnog kviza
+              bez korisničkog računa.
+            </p>
+
+            <p>
+              Više informacija o obradi podataka
+              dostupno je u
+              <a
+                href="https://www.cloudflare.com/turnstile-privacy-policy/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Cloudflare Turnstile politici privatnosti
+              </a>.
+            </p>
+          </section>
+
+          <section>
+            <h2>6. Međunarodni prijenos podataka</h2>
 
             <p>{{ legal.transfers }}</p>
           </section>
 
           <section>
-            <h2>6. Koliko dugo čuvamo podatke?</h2>
+            <h2>7. Koliko dugo čuvamo podatke?</h2>
 
             <p>
               Podatke aktivnog korisničkog računa
@@ -175,7 +270,7 @@
           </section>
 
           <section>
-            <h2>7. Lokalna pohrana</h2>
+            <h2>8. Kolačići i lokalna pohrana</h2>
 
             <p>
               Aplikacija koristi lokalnu pohranu
@@ -185,20 +280,42 @@
             </p>
 
             <p>
+              Cloudflare Turnstile može koristiti
+              tehnologije preglednika potrebne za
+              izvršavanje sigurnosne provjere
+              i sprječavanje zlouporabe.
+            </p>
+
+            <p>
+              Navedene funkcionalnosti koristimo
+              radi omogućavanja rada aplikacije,
+              održavanja korisničke sesije i
+              sigurnosti korisničkih računa.
+            </p>
+
+            <p>
               Lokalne podatke možeš ukloniti
               kroz postavke svojeg preglednika.
               Time se neće automatski obrisati
               korisnički račun u bazi.
             </p>
 
+            <p>
+              Onemogućavanje određenih tehnologija
+              preglednika može utjecati na mogućnost
+              prijave, registracije ili korištenja
+              drugih funkcionalnosti računa.
+            </p>
+
             <p>{{ legal.tracking }}</p>
           </section>
 
           <section>
-            <h2>8. Tvoja prava</h2>
+            <h2>9. Tvoja prava</h2>
 
             <p>
-              Ovisno o okolnostima obrade, imaš pravo na:
+              Ovisno o okolnostima obrade,
+              imaš pravo na:
             </p>
 
             <ul>
@@ -208,7 +325,10 @@
               <li>Ograničenje obrade.</li>
               <li>Prenosivost podataka.</li>
               <li>Prigovor na obradu.</li>
-              <li>Povlačenje privole kada se obrada na njoj temelji.</li>
+              <li>
+                Povlačenje privole kada se obrada
+                na njoj temelji.
+              </li>
             </ul>
 
             <p>
@@ -219,39 +339,106 @@
             </p>
 
             <p>
+              Na zahtjeve odgovaramo bez nepotrebnog
+              odgađanja, u rokovima propisanim
+              primjenjivim propisima o zaštiti
+              osobnih podataka.
+            </p>
+
+            <p>
               Imaš pravo podnijeti pritužbu Agenciji
               za zaštitu osobnih podataka (AZOP):
-              <a href="https://azop.hr/"
-                 target="_blank"
-                 rel="noopener noreferrer">
+              <a
+                href="https://azop.hr/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 azop.hr
               </a>.
             </p>
           </section>
 
           <section>
-            <h2>9. Brisanje računa</h2>
+            <h2>10. Brisanje računa</h2>
 
             <p>
               Svoj korisnički račun možeš
-              trajno obrisati putem stranice
-              za brisanje računa.
+              trajno obrisati u bilo kojem trenutku
+              putem stranice Moj profil.
             </p>
 
-            <router-link
+            <p>
+              Unutar korisničkog profila nalazi se
+              odjeljak za upravljanje računom
+              s mogućnošću trajnog brisanja.
+            </p>
+
+            <p>
+              Radi sigurnosti potrebno je potvrditi
+              identitet unosom trenutne lozinke,
+              izvršiti sigurnosnu provjeru i potvrditi
+              zahtjev za brisanje.
+            </p>
+
+            <p>
+              Brisanjem računa uklanjaju se korisnički
+              račun i povezani profil iz aktivne baze,
+              uz moguće iznimke i rokove čuvanja
+              opisane u ovoj politici privatnosti.
+            </p>
+
+            <p>
+              Nakon brisanja računa možeš nastaviti
+              igrati ODOKATIVNO. kao gost.
+            </p>
+
+            <v-btn
+              color="error"
+              variant="outlined"
+              prepend-icon="mdi-trash-can-outline"
+              class="legal-action"
               to="/brisanje-racuna"
-              class="auth-link"
             >
               Brisanje korisničkog računa
-            </router-link>
+            </v-btn>
           </section>
 
           <section>
-            <h2>10. Izmjene politike privatnosti</h2>
+            <h2>11. Sigurnost osobnih podataka</h2>
 
             <p>
-              Ovu politiku ažuriramo kada
-              se promijeni način obrade podataka.
+              Primjenjujemo tehničke i organizacijske
+              mjere namijenjene zaštiti osobnih
+              podataka od neovlaštenog pristupa,
+              gubitka i zlouporabe.
+            </p>
+
+            <p>
+              Koristimo zaštićenu HTTPS komunikaciju,
+              autentifikacijski sustav Supabase,
+              pravila pristupa bazi podataka
+              i Cloudflare Turnstile za zaštitu
+              autentifikacijskih obrazaca.
+            </p>
+
+            <p>
+              Nijedan informacijski sustav ne može
+              jamčiti potpunu sigurnost, stoga
+              preporučujemo korištenje snažne
+              i jedinstvene lozinke.
+            </p>
+          </section>
+
+          <section>
+            <h2>12. Izmjene politike privatnosti</h2>
+
+            <p>
+              Ovu politiku ažuriramo kada se promijeni
+              način obrade podataka, funkcionalnosti
+              aplikacije ili primjenjivi propisi.
+            </p>
+
+            <p>
               O bitnim promjenama korisnike ćemo
               obavijestiti na odgovarajući način.
             </p>
@@ -259,6 +446,7 @@
         </template>
 
         <!-- UVJETI KORIŠTENJA -->
+
         <template v-else>
           <section>
             <h2>1. O aplikaciji</h2>
@@ -284,8 +472,14 @@
             <ul>
               <li>Dnevni izazov sadrži sedam pitanja.</li>
               <li>Za svako pitanje imaš 20 sekundi.</li>
-              <li>Bodovi ovise o širini odabranog raspona.</li>
-              <li>Promašaj ili istek vremena donosi 0 bodova.</li>
+              <li>
+                Bodovi ovise o širini odabranog
+                raspona.
+              </li>
+              <li>
+                Promašaj ili istek vremena
+                donosi 0 bodova.
+              </li>
             </ul>
 
             <p>
@@ -309,6 +503,14 @@
               uvredljiv sadržaj niti kršiti prava
               drugih osoba.
             </p>
+
+            <p>
+              Prilikom registracije, prijave,
+              obnove lozinke i brisanja računa
+              korisnik može biti obvezan izvršiti
+              sigurnosnu provjeru radi zaštite
+              od automatiziranih zahtjeva.
+            </p>
           </section>
 
           <section>
@@ -322,6 +524,14 @@
               <li>Neovlašteno pristupati tuđim računima.</li>
               <li>Koristiti botove za ometanje usluge.</li>
               <li>Zaobilaziti pravila natjecanja.</li>
+              <li>
+                Zaobilaziti sigurnosne provjere
+                radi zlouporabe usluge.
+              </li>
+              <li>
+                Automatizirano kreirati korisničke
+                račune radi zlouporabe usluge.
+              </li>
             </ul>
 
             <p>
@@ -364,6 +574,9 @@
               Izvorni dizajn, programski kod i
               drugi autorski sadržaji zaštićeni
               su primjenjivim pravima.
+            </p>
+
+            <p>
               Sadržaji trećih strana koriste se
               prema njihovim licencama i dozvolama.
             </p>
@@ -382,12 +595,39 @@
 
             <p>
               Korisnik može prestati koristiti
-              aplikaciju i zatražiti brisanje računa.
+              aplikaciju i obrisati svoj račun
+              u bilo kojem trenutku.
+            </p>
+
+            <p>
+              Mogućnost brisanja dostupna je
+              unutar stranice Moj profil ili
+              izravno putem sljedeće poveznice:
+            </p>
+
+            <router-link to="/brisanje-racuna">
+              Brisanje korisničkog računa
+            </router-link>
+          </section>
+
+          <section>
+            <h2>9. Izmjene uvjeta korištenja</h2>
+
+            <p>
+              Uvjete korištenja možemo ažurirati
+              radi razvoja aplikacije, uvođenja
+              novih funkcionalnosti ili usklađivanja
+              s primjenjivim propisima.
+            </p>
+
+            <p>
+              O bitnim promjenama korisnike ćemo
+              obavijestiti na odgovarajući način.
             </p>
           </section>
 
           <section>
-            <h2>9. Završne odredbe</h2>
+            <h2>10. Završne odredbe</h2>
 
             <p>
               Primjenjuje se hrvatsko pravo,
@@ -404,6 +644,8 @@
           </section>
         </template>
       </article>
+
+      <!-- POVRATAK NA POČETNU -->
 
       <v-btn
         variant="outlined"
@@ -440,18 +682,22 @@ const pageSubtitle = computed(() =>
     : 'Pravila za poštenu i zabavnu igru.'
 )
 
-// OBAVEZNO POPUNITI PRIJE OBJAVE
+// OBAVEZNO POPUNITI PRIJE JAVNE OBJAVE
+
 const legal = {
   operator: '[Ime i prezime ili naziv voditelja obrade]',
+
   address: '[Kontaktna adresa voditelja obrade]',
+
   email: '[E-mail za kontakt]',
-  updatedAt: '[Datum objave]',
+
+  updatedAt: '27. studenoga 2026.',
 
   transfers:
     '[Upisati stvarne države prijenosa, pravne mehanizme i način dobivanja informacija o zaštitnim mjerama.]',
 
   retention:
-    '[Upisati rokove ili kriterije čuvanja tehničkih zapisa, SMTP zapisa i sigurnosnih kopija.]',
+    '[Upisati rokove ili kriterije čuvanja tehničkih zapisa, SMTP zapisa, sigurnosnih podataka i sigurnosnih kopija.]',
 
   tracking:
     '[Navesti koristi li stranica analitiku, dodatne kolačiće ili tehnologije praćenja.]',
@@ -470,6 +716,8 @@ const legal = {
   padding: 48px 24px 64px;
 }
 
+/* ZAGLAVLJE */
+
 .legal-header {
   text-align: center;
   margin-bottom: 32px;
@@ -479,11 +727,15 @@ const legal = {
   display: flex;
   align-items: center;
   justify-content: center;
+
   width: 76px;
   height: 76px;
+
   margin: 0 auto 24px;
+
   border: 1px solid #181818;
   border-radius: 20px;
+
   background: #facc15;
 }
 
@@ -505,9 +757,13 @@ const legal = {
   color: #64635d;
 }
 
+/* SADRŽAJ */
+
 .legal-card {
   padding: 36px;
+
   background: #fffdf6;
+
   border: 1px solid #181818;
   border-radius: 24px;
 }
@@ -515,6 +771,7 @@ const legal = {
 .legal-card section + section {
   margin-top: 28px;
   padding-top: 28px;
+
   border-top: 1px solid #dedcd3;
 }
 
@@ -529,6 +786,7 @@ const legal = {
   font-size: 15px;
   line-height: 1.8;
   color: #55544f;
+
   overflow-wrap: anywhere;
 }
 
@@ -541,22 +799,66 @@ const legal = {
   margin-bottom: 16px;
 }
 
+.legal-card li {
+  margin-bottom: 4px;
+}
+
 .legal-card a {
   color: #181818;
   font-weight: 600;
   text-underline-offset: 3px;
 }
 
+.legal-card a:hover {
+  text-decoration: underline;
+}
+
+/* GUMBI */
+
+.legal-action {
+  margin-top: 8px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-transform: none;
+  letter-spacing: 0;
+
+  max-width: 100%;
+}
+
+.legal-card .legal-action {
+  color: #dc2626;
+}
+
 .back-button {
   display: flex;
+
   margin: 28px auto 0;
+
+  border-radius: 10px;
+
   text-transform: none;
   letter-spacing: 0;
 }
 
+/* MOBITEL */
+
 @media (max-width: 599px) {
   .legal-container {
     padding: 28px 16px 40px;
+  }
+
+  .legal-header {
+    margin-bottom: 24px;
+  }
+
+  .legal-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 18px;
   }
 
   .legal-card {
@@ -566,6 +868,21 @@ const legal = {
 
   .legal-card h2 {
     font-size: 18px;
+  }
+
+  .legal-card p,
+  .legal-card li {
+    font-size: 14px;
+  }
+
+  .legal-card section + section {
+    margin-top: 22px;
+    padding-top: 22px;
+  }
+
+  .legal-action {
+    width: 100%;
+    font-size: 12px;
   }
 }
 </style>

@@ -25,9 +25,8 @@
         class="mb-4"
       >
         Račun je obrisan, ali lokalna odjava
-        nije potvrđena. Osvježi stranicu
-        ili ukloni podatke ove stranice
-        iz preglednika.
+        nije potvrđena. Osvježi stranicu ili
+        ukloni podatke stranice iz preglednika.
       </v-alert>
 
       <v-btn
@@ -133,6 +132,11 @@
           ]"
         />
 
+        <TurnstileCheck
+          :key="captchaKey"
+          v-model="captchaToken"
+        />
+
         <v-alert
           v-if="errorMessage"
           type="error"
@@ -149,7 +153,11 @@
           height="52"
           elevation="0"
           :loading="loading"
-          :disabled="confirmation !== 'OBRIŠI'"
+          :disabled="
+            loading ||
+            confirmation !== 'OBRIŠI' ||
+            !captchaToken
+          "
           class="font-weight-bold mb-3"
         >
           TRAJNO OBRIŠI RAČUN
@@ -183,6 +191,8 @@
 import { ref } from 'vue'
 
 import AuthLayout from '@/components/layout/AuthLayout.vue'
+import TurnstileCheck from '@/components/auth/TurnstileCheck.vue'
+
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/services/supabase'
 import { rules } from '@/utils/validation'
@@ -198,6 +208,9 @@ const completed = ref(false)
 const logoutWarning = ref(false)
 const errorMessage = ref('')
 
+const captchaToken = ref('')
+const captchaKey = ref(0)
+
 const messages = {
   unauthorized:
     'Sesija je istekla. Prijavi se ponovno.',
@@ -208,28 +221,41 @@ const messages = {
   rate_limit:
     'Previše pokušaja. Pokušaj kasnije.',
 
+  captcha_failed:
+    'Sigurnosna provjera nije uspjela.',
+
   delete_failed:
     'Račun nije obrisan. Pokušaj ponovno.',
 }
 
-async function deleteAccount(event) {
-  const { valid } = await event
+function resetCaptcha() {
+  captchaToken.value = ''
+  captchaKey.value += 1
+}
 
-  if (
-    !valid ||
-    loading.value ||
-    !supabase ||
-    !authStore.isAuthenticated ||
-    authStore.isRecovery ||
-    confirmation.value !== 'OBRIŠI'
-  ) {
-    return
-  }
+async function deleteAccount(event) {
+  if (loading.value) return
 
   loading.value = true
   errorMessage.value = ''
 
   try {
+    const { valid } = await event
+
+    if (
+      !valid ||
+      !supabase ||
+      !authStore.isAuthenticated ||
+      authStore.isRecovery ||
+      !captchaToken.value ||
+      confirmation.value !== 'OBRIŠI'
+    ) {
+      return
+    }
+
+    const token = captchaToken.value
+    captchaToken.value = ''
+
     const { data, error } =
       await supabase.functions.invoke(
         'delete-account',
@@ -237,6 +263,7 @@ async function deleteAccount(event) {
           body: {
             password: password.value,
             confirmation: confirmation.value,
+            captchaToken: token,
           },
         }
       )
@@ -253,20 +280,22 @@ async function deleteAccount(event) {
 
       errorMessage.value =
         messages[errorCode] ||
-        'Brisanje nije potvrđeno. Provjeri vezu i status računa.'
+        'Brisanje nije potvrđeno. Provjeri status računa.'
 
+      resetCaptcha()
       return
     }
 
     if (!data?.success) {
       errorMessage.value =
         'Brisanje računa nije potvrđeno.'
+
+      resetCaptcha()
       return
     }
 
     password.value = ''
     confirmation.value = ''
-
     completed.value = true
 
     const signedOut = await authStore.logout()
@@ -283,7 +312,10 @@ async function deleteAccount(event) {
     } else {
       errorMessage.value =
         'Dogodila se greška. Provjeri status računa.'
+
+      resetCaptcha()
     }
+
   } finally {
     password.value = ''
     loading.value = false
