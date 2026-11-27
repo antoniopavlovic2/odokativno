@@ -3,7 +3,7 @@
     <AppHeader
       @rules="rules = true"
       @statistics="statistics = true"
-      @leaderboard="leaderboard = true"
+      @leaderboard="$router.push({ name: 'leaderboard' })"
     />
 
     <v-main>

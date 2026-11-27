@@ -41,6 +41,22 @@ const routes = [
   },
 
   // =========================================
+  // RANG-LISTA
+  // =========================================
+
+  {
+    path: '/rang-lista',
+    name: 'leaderboard',
+    component: () =>
+      import('@/views/LeaderboardView.vue'),
+    meta: {
+      title: 'Dnevna rang-lista | Odokativno',
+      description: 'Pogledaj najbolje igrače dnevnog kviza Odokativno i saznaj tko ima najbolji osjećaj za brojke.',
+      robots: 'index, follow',
+    },
+  },
+
+  // =========================================
   // AUTENTIFIKACIJA
   // =========================================
 

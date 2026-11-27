@@ -1,3 +1,4 @@
+
 <template>
   <div
     class="game-page"
@@ -5,14 +6,109 @@
     @keydown="settingsStore.unlockSound()"
   >
     <v-container class="game-container">
+
       <h1 class="sr-only">
         Odokativno – dnevni izazov
       </h1>
 
+      <!-- AUTENTIFIKACIJA -->
+
+      <div
+        v-if="!authStore.initialized"
+        class="loading-state"
+      >
+        <v-progress-circular
+          indeterminate
+          color="primary"
+          size="48"
+        />
+
+        <p>Učitavanje korisničke sesije...</p>
+      </div>
+
+      <!-- OBNOVA LOZINKE -->
+
       <section
-        v-if="gameStore.error"
+        v-else-if="authStore.isRecovery"
         class="empty-state"
       >
+        <v-icon
+          icon="mdi-lock-reset"
+          size="64"
+          color="primary"
+        />
+
+        <h2>Postavi novu lozinku.</h2>
+
+        <p>
+          Prije nastavka igre dovrši obnovu lozinke.
+        </p>
+
+        <v-btn
+          color="primary"
+          to="/nova-lozinka"
+        >
+          Nova lozinka
+        </v-btn>
+      </section>
+
+      <!-- PRIVREMENO: REGISTRIRANI IGRAČI -->
+
+      <section
+        v-else-if="!canPlay"
+        class="empty-state"
+      >
+
+        <v-icon
+          icon="mdi-trophy-outline"
+          size="64"
+          color="primary"
+        />
+
+        <h2>Zaigraj za svoje mjesto!</h2>
+
+        <p>
+          Prijavi se i osvoji svoje mjesto
+          na globalnoj rang-listi.
+        </p>
+
+        <div class="auth-actions">
+
+          <v-btn
+            color="primary"
+            size="large"
+            to="/prijava"
+          >
+            Prijavi se
+          </v-btn>
+
+          <v-btn
+            variant="outlined"
+            size="large"
+            to="/registracija"
+          >
+            Registriraj se
+          </v-btn>
+
+        </div>
+
+        <v-btn
+          variant="text"
+          to="/rang-lista"
+          prepend-icon="mdi-trophy-outline"
+        >
+          Pogledaj rang-listu
+        </v-btn>
+
+      </section>
+
+      <!-- GREŠKA PRI POKRETANJU -->
+
+      <section
+        v-else-if="gameStore.error"
+        class="empty-state"
+      >
+
         <v-icon
           icon="mdi-calendar-alert"
           size="64"
@@ -20,15 +116,50 @@
         />
 
         <h2>Izazov nije dostupan</h2>
+
         <p>{{ gameStore.error }}</p>
 
-        <v-btn color="primary" size="large" to="/">
+        <div class="auth-actions">
+
+          <v-btn
+            color="primary"
+            size="large"
+            prepend-icon="mdi-refresh"
+            :loading="gameStore.loading"
+            @click="initializeGame"
+          >
+            Pokušaj ponovno
+          </v-btn>
+
+          <v-btn
+            variant="outlined"
+            to="/profil"
+          >
+            Moj profil
+          </v-btn>
+
+        </div>
+
+        <v-btn
+          variant="text"
+          to="/"
+        >
           Povratak na početnu
         </v-btn>
+
       </section>
 
-      <template v-else-if="gameStore.currentQuestion">
+      <!-- AKTIVNA IGRA -->
+
+      <template
+        v-else-if="
+          gameStore.currentQuestion &&
+          gameStore.belongsToCurrentUser
+        "
+      >
+
         <div class="game-top">
+
           <GameProgress
             :challenge-number="gameStore.challengeNumber"
             :current-question="gameStore.currentQuestionNumber"
@@ -43,17 +174,58 @@
             :total-time="gameStore.timeLimit"
             class="question-timer"
           />
+
         </div>
 
+        <!-- MREŽNA GREŠKA -->
+
+        <v-alert
+          v-if="gameStore.requestError"
+          type="warning"
+          variant="tonal"
+          class="mb-4"
+        >
+
+          <strong>
+            Komunikacija sa serverom nije uspjela.
+          </strong>
+
+          <p class="mt-2">
+            {{ gameStore.requestError }}
+          </p>
+
+          <p class="mt-2">
+            Provjeri internetsku vezu.
+            Vrijeme odgovaranja nastavlja teći.
+          </p>
+
+          <v-btn
+            variant="outlined"
+            class="mt-3"
+            prepend-icon="mdi-refresh"
+            :loading="gameStore.loading"
+            @click="gameStore.syncState()"
+          >
+            Uskladi stanje igre
+          </v-btn>
+
+        </v-alert>
+
+        <!-- PITANJE I ODGOVOR -->
+
         <v-row align="start">
+
           <v-col cols="12" md="6">
+
             <QuestionCard
               :key="'question-' + gameStore.currentQuestion.id"
               :question="gameStore.currentQuestion"
             />
+
           </v-col>
 
           <v-col cols="12" md="6">
+
             <RangeSelector
               v-if="gameStore.isPlaying"
               :key="'range-' + gameStore.currentQuestion.id"
@@ -64,13 +236,19 @@
               :unit="gameStore.currentQuestion.unit"
               :potential-points="gameStore.potentialPoints"
               :max-points="gameStore.maxPointsPerQuestion"
-              :disabled="gameStore.isTimeExpired"
+              :disabled="
+                gameStore.isTimeExpired ||
+                gameStore.loading
+              "
               @update:model-value="gameStore.updateRange"
               @confirm="submitAnswer"
             />
 
             <AnswerFeedback
-              v-else-if="gameStore.isAnswered && gameStore.currentAnswer"
+              v-else-if="
+                gameStore.isAnswered &&
+                gameStore.currentAnswer
+              "
               :key="'feedback-' + gameStore.currentQuestion.id"
               :correct="gameStore.currentAnswer.correct"
               :timed-out="gameStore.currentAnswer.timedOut"
@@ -80,15 +258,39 @@
               :unit="gameStore.currentQuestion.unit"
               :min="gameStore.currentQuestion.min"
               :max="gameStore.currentQuestion.max"
-              :explanation="gameStore.currentQuestion.explanation"
-              :source="gameStore.currentQuestion.source"
+              :explanation="gameStore.currentAnswer.explanation || ''"
+              :source="gameStore.currentAnswer.source || ''"
               :is-last-question="gameStore.isLastQuestion"
               @next="nextQuestion"
             />
+
+            <!-- SPREMANJE ODGOVORA -->
+
+            <div
+              v-if="gameStore.loading"
+              class="saving-state"
+              role="status"
+            >
+
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                size="20"
+                width="3"
+              />
+
+              <span>
+                Usklađivanje sa serverom...
+              </span>
+
+            </div>
+
           </v-col>
+
         </v-row>
 
         <div class="game-bottom">
+
           <v-btn
             variant="text"
             prepend-icon="mdi-help-circle-outline"
@@ -97,11 +299,21 @@
             Kako se igra?
           </v-btn>
 
-          <span>Nemaš pojma? Nema veze.</span>
+          <span>
+            Nemaš pojma? Nema veze.
+          </span>
+
         </div>
+
       </template>
 
-      <div v-else class="loading-state">
+      <!-- UČITAVANJE -->
+
+      <div
+        v-else
+        class="loading-state"
+      >
+
         <v-progress-circular
           indeterminate
           color="primary"
@@ -109,19 +321,28 @@
         />
 
         <p>Učitavanje dnevnog izazova...</p>
+
       </div>
+
     </v-container>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch, nextTick } from 'vue'
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+  nextTick,
+} from 'vue'
+
 import { useRouter } from 'vue-router'
 
+import { useAuthStore } from '@/stores/authStore'
 import { useGameStore } from '@/stores/gameStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 
-import { getTodayDate } from '@/utils/date'
 import { soundService } from '@/services/soundService'
 
 import GameProgress from '@/components/game/GameProgress.vue'
@@ -133,27 +354,337 @@ import AnswerFeedback from '@/components/game/AnswerFeedback.vue'
 const emit = defineEmits(['rules'])
 
 const router = useRouter()
+
+const authStore = useAuthStore()
 const gameStore = useGameStore()
 const settingsStore = useSettingsStore()
 
 let timerInterval = null
+let alive = true
 
-// Inicijalizacija igre
-onMounted(() => {
-  if (typeof gameStore.updateTimer !== 'function') {
-    gameStore.error =
-      'Timer nije dostupan. Provjeri verziju gameStore.js.'
+const canPlay = computed(() =>
+  authStore.isAuthenticated &&
+  !authStore.isRecovery &&
+  !authStore.user?.is_anonymous
+)
 
+// =========================================
+// INICIJALIZACIJA
+// =========================================
+
+async function initializeGame() {
+
+  if (
+    !alive ||
+    !authStore.initialized
+  ) {
     return
   }
 
-  initializeGame()
+  if (!canPlay.value) {
+    gameStore.resetGame()
+    return
+  }
 
-  if (gameStore.isFinished || gameStore.error) {
+  const success = await gameStore.startGame()
+
+  if (!alive || !success) {
+    return
+  }
+
+  if (gameStore.isFinished) {
+
+    if (router.currentRoute.value.name === 'game') {
+      router.replace({ name: 'results' })
+    }
+
     return
   }
 
   gameStore.updateTimer()
+}
+
+// =========================================
+// TIMER
+// =========================================
+
+function startTimerInterval() {
+
+  stopTimerInterval()
+
+  timerInterval = window.setInterval(() => {
+
+    if (gameStore.isPlaying) {
+      gameStore.updateTimer()
+    }
+
+  }, 100)
+}
+
+function stopTimerInterval() {
+
+  if (timerInterval !== null) {
+
+    window.clearInterval(
+      timerInterval
+    )
+
+    timerInterval = null
+  }
+}
+
+function syncTimer() {
+
+  if (document.hidden) {
+    soundService.stopAll()
+  }
+
+  if (gameStore.isPlaying) {
+    gameStore.updateTimer()
+  }
+
+  // Pri povratku na karticu dohvaćamo
+  // stvarno stanje sesije sa servera.
+
+  if (
+    !document.hidden &&
+    gameStore.sessionId &&
+    !gameStore.loading &&
+    (
+      gameStore.isPlaying ||
+      gameStore.isAnswered
+    )
+  ) {
+    void gameStore.syncState()
+  }
+}
+
+// =========================================
+// ZVUČNO ODBROJAVANJE
+// =========================================
+
+watch(
+  () => gameStore.remainingTime,
+
+  (seconds, previousSeconds) => {
+
+    if (!gameStore.isPlaying) return
+    if (document.hidden) return
+    if (seconds >= previousSeconds) return
+
+    if (seconds >= 1 && seconds <= 5) {
+
+      settingsStore.playSound(
+        'urgentTick'
+      )
+
+    } else if (
+      seconds >= 6 &&
+      seconds <= 10
+    ) {
+
+      settingsStore.playSound(
+        'tick'
+      )
+    }
+  }
+)
+
+// =========================================
+// ZVUČNI EFEKTI I STATUS IGRE
+// =========================================
+
+watch(
+  () => gameStore.status,
+
+  (status, previousStatus) => {
+
+    if (!alive) return
+    if (!gameStore.belongsToCurrentUser) return
+
+    if (status === 'playing') {
+
+      soundService.stopAll()
+
+      if (!document.hidden) {
+        settingsStore.playSound(
+          'questionStart'
+        )
+      }
+
+      focusElement('question-title')
+    }
+
+    if (status === 'answered') {
+
+      soundService.stopAll()
+
+      const answer =
+        gameStore.currentAnswer
+
+      if (answer && !document.hidden) {
+
+        if (answer.timedOut) {
+
+          settingsStore.playSound(
+            'timeout'
+          )
+
+        } else if (answer.correct) {
+
+          settingsStore.playSound(
+            'correct'
+          )
+
+        } else {
+
+          settingsStore.playSound(
+            'incorrect'
+          )
+        }
+      }
+
+      focusElement('feedback-title')
+    }
+
+    if (status === 'finished') {
+
+      stopTimerInterval()
+      soundService.stopAll()
+
+      if (
+        previousStatus === 'answered' &&
+        !document.hidden
+      ) {
+        settingsStore.playSound(
+          'finished'
+        )
+      }
+
+      if (router.currentRoute.value.name === 'game') {
+        router.replace({ name: 'results' })
+      }
+    }
+  },
+
+  { flush: 'sync' }
+)
+
+// =========================================
+// ODGOVARANJE
+// =========================================
+
+async function submitAnswer() {
+
+  if (
+    !gameStore.isPlaying ||
+    gameStore.loading
+  ) {
+    return
+  }
+
+  await gameStore.submitAnswer()
+}
+
+// =========================================
+// SLJEDEĆE PITANJE
+// =========================================
+
+async function nextQuestion() {
+
+  if (
+    !gameStore.isAnswered ||
+    gameStore.loading
+  ) {
+    return
+  }
+
+  const success =
+    await gameStore.nextQuestion()
+
+  if (
+    !alive ||
+    !success ||
+    gameStore.isFinished
+  ) {
+    return
+  }
+
+  focusElement('question-title')
+}
+
+// =========================================
+// PRISTUPAČNOST
+// =========================================
+
+async function focusElement(id) {
+
+  await nextTick()
+
+  if (!alive) return
+
+  const element =
+    document.getElementById(id)
+
+  if (!element) return
+
+  element.setAttribute(
+    'tabindex',
+    '-1'
+  )
+
+  element.focus({
+    preventScroll: true,
+  })
+
+  element.scrollIntoView({
+    behavior: 'auto',
+    block: 'nearest',
+  })
+}
+
+// =========================================
+// PRAĆENJE KORISNIČKE SESIJE
+// =========================================
+
+watch(
+  [
+    () => authStore.initialized,
+    () => authStore.userId,
+    () => authStore.isRecovery,
+    canPlay,
+  ],
+
+  () => {
+
+    if (!authStore.initialized) {
+      return
+    }
+
+    if (
+      !canPlay.value ||
+      (
+        gameStore.ownerId &&
+        gameStore.ownerId !== authStore.userId
+      )
+    ) {
+      gameStore.resetGame()
+    }
+
+    if (canPlay.value) {
+      void initializeGame()
+    }
+  },
+
+  { immediate: true }
+)
+
+// =========================================
+// LIFECYCLE
+// =========================================
+
+onMounted(() => {
+
   startTimerInterval()
 
   document.addEventListener(
@@ -163,6 +694,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+
+  alive = false
+
   stopTimerInterval()
 
   if (!gameStore.isFinished) {
@@ -174,177 +708,6 @@ onUnmounted(() => {
     syncTimer
   )
 })
-
-function initializeGame() {
-  const today = getTodayDate()
-  const isDevelopment =
-    process.env.NODE_ENV === 'development'
-
-  const hasActiveChallenge =
-    gameStore.challenge &&
-    (
-      gameStore.challenge.date === today ||
-      isDevelopment
-    )
-
-  if (hasActiveChallenge) {
-    if (gameStore.isFinished) {
-      router.replace({ name: 'results' })
-      return
-    }
-
-    if (gameStore.isPlaying || gameStore.isAnswered) {
-      preloadNextImage()
-      return
-    }
-  }
-
-  let started = gameStore.startGame(today)
-
-  if (!started && isDevelopment) {
-    started = gameStore.startTestGame()
-  }
-
-  if (started) {
-    preloadNextImage()
-  }
-}
-
-// Timer
-function startTimerInterval() {
-  stopTimerInterval()
-
-  timerInterval = window.setInterval(() => {
-    if (gameStore.isPlaying) {
-      gameStore.updateTimer()
-    }
-  }, 100)
-}
-
-function stopTimerInterval() {
-  if (timerInterval !== null) {
-    window.clearInterval(timerInterval)
-    timerInterval = null
-  }
-}
-
-function syncTimer() {
-  if (document.hidden) {
-    soundService.stopAll()
-  }
-
-  if (gameStore.isPlaying) {
-    gameStore.updateTimer()
-  }
-}
-
-// Zvučno odbrojavanje
-watch(
-  () => gameStore.remainingTime,
-  (seconds, previousSeconds) => {
-    if (!gameStore.isPlaying) return
-    if (document.hidden) return
-    if (seconds >= previousSeconds) return
-
-    if (seconds >= 1 && seconds <= 5) {
-      settingsStore.playSound('urgentTick')
-    } else if (seconds >= 6 && seconds <= 10) {
-      settingsStore.playSound('tick')
-    }
-  }
-)
-
-// Zvučni efekti odgovora
-watch(
-  () => gameStore.status,
-  status => {
-    if (status === 'playing') {
-      soundService.stopAll()
-
-      if (!document.hidden) {
-        settingsStore.playSound('questionStart')
-      }
-    }
-
-    if (status === 'answered') {
-      soundService.stopAll()
-
-      const answer = gameStore.currentAnswer
-
-      if (answer && !document.hidden) {
-        if (answer.timedOut) {
-          settingsStore.playSound('timeout')
-        } else if (answer.correct) {
-          settingsStore.playSound('correct')
-        } else {
-          settingsStore.playSound('incorrect')
-        }
-      }
-
-      focusElement('feedback-title')
-    }
-  },
-  { flush: 'sync' }
-)
-
-function submitAnswer() {
-  if (!gameStore.isPlaying) return
-
-  gameStore.submitAnswer()
-}
-
-function nextQuestion() {
-  const success = gameStore.nextQuestion()
-
-  if (!success) return
-
-  if (gameStore.isFinished) {
-    stopTimerInterval()
-
-    soundService.stopAll()
-    settingsStore.playSound('finished')
-
-    router.push({ name: 'results' })
-    return
-  }
-
-  focusElement('question-title')
-}
-
-// Pristupačnost
-async function focusElement(id) {
-  await nextTick()
-
-  const element = document.getElementById(id)
-
-  if (!element) return
-
-  element.setAttribute('tabindex', '-1')
-  element.focus({ preventScroll: true })
-
-  element.scrollIntoView({
-    behavior: 'auto',
-    block: 'nearest',
-  })
-}
-
-// Predučitavanje fotografija
-function preloadNextImage() {
-  const nextIndex = gameStore.currentQuestionIndex + 1
-  const nextQuestion = gameStore.questions[nextIndex]
-
-  if (!nextQuestion?.image) return
-
-  const image = new Image()
-  image.src = nextQuestion.image
-}
-
-watch(
-  () => gameStore.currentQuestionIndex,
-  () => {
-    preloadNextImage()
-  }
-)
 </script>
 
 <style scoped>
@@ -401,6 +764,27 @@ watch(
   color: #64635d;
 }
 
+.auth-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.saving-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background: #fffdf6;
+  border: 1px solid #d8d5ca;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 16px;
+  color: #64635d;
+  font-size: 13px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -414,12 +798,14 @@ watch(
 }
 
 @media (max-width: 959px) {
+
   .game-container {
     max-width: 600px;
   }
 }
 
 @media (max-width: 599px) {
+
   .game-container {
     padding: 24px 16px 40px;
   }

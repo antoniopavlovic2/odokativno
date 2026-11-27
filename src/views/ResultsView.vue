@@ -200,6 +200,17 @@
 
         <v-btn
           block
+          color="#181818"
+          height="60"
+          elevation="0"
+          prepend-icon="mdi-trophy-outline"
+          class="action-button leaderboard-button"
+          :to="{ name: 'leaderboard' }"
+        >
+          POGLEDAJ RANG-LISTU
+      </v-btn>
+        <v-btn
+          block
           variant="outlined"
           color="secondary"
           height="54"
@@ -209,15 +220,6 @@
           POVRATAK NA POČETNU
         </v-btn>
 
-        <v-btn
-          v-if="isDevelopment"
-          block
-          variant="text"
-          prepend-icon="mdi-replay"
-          @click="replayTestGame"
-        >
-          Ponovi testni izazov
-        </v-btn>
       </div>
 
       <section class="next-challenge">
@@ -259,23 +261,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useGameStore } from '@/stores/gameStore'
-import { useSettingsStore } from '@/stores/settingsStore'
 
 const router = useRouter()
 const gameStore = useGameStore()
-const settingsStore = useSettingsStore()
 
 const snackbar = ref(false)
 const snackbarMessage = ref('')
-
-const isDevelopment =
-  process.env.NODE_ENV === 'development'
-
-onMounted(() => {
-  if (!gameStore.isFinished) {
-    router.replace({ name: 'home' })
-  }
-})
 
 const challengeNumber = computed(() => {
   return String(gameStore.challengeNumber).padStart(3, '0')
@@ -406,14 +397,11 @@ function showMessage(message) {
   snackbar.value = true
 }
 
-function replayTestGame() {
-  if (!isDevelopment) return
-
-  settingsStore.unlockSound()
-  gameStore.resetGame()
-
-  router.push({ name: 'game' })
-}
+onMounted(() => {
+  if (!gameStore.isFinished) {
+    router.replace({ name: 'home' })
+  }
+})
 </script>
 
 <style scoped>
@@ -555,6 +543,11 @@ function replayTestGame() {
 .answer-correct {
   background: #dcfce7;
   color: #15803d;
+}
+
+.leaderboard-button {
+  color: #facc15 !important;
+  font-weight: 700;
 }
 
 .answer-incorrect {

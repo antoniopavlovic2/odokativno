@@ -247,6 +247,14 @@
             </v-icon>
           </button>
 
+          <AdminChallengePublish
+            :challenge="challenge"
+            :questions="challenge.items || []"
+            :now="publicationClock"
+            :disabled="loading || questionsLoading || creating || calendarOpening || questionDialog"
+            @changed="onPublicationChanged"
+          />
+
           <!-- OTVORENI IZAZOV -->
 
           <div
@@ -585,6 +593,7 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
   onBeforeUnmount,
   nextTick
 } from 'vue'
@@ -608,6 +617,9 @@ import AdminChallengeActions
 import AdminChallengeCalendar
   from '@/components/admin/AdminChallengeCalendar.vue'
 
+import AdminChallengePublish
+  from '@/components/admin/AdminChallengePublish.vue'
+
 const authStore = useAuthStore()
 const adminStore = useAdminStore()
 
@@ -617,6 +629,8 @@ const adminStore = useAdminStore()
 
 const challenges = ref([])
 const calendarVersion = ref(0)
+const publicationClock = ref(Date.now())
+let publicationInterval = null
 const calendarOpening = ref(false)
 const selectedQuestions = ref([])
 const selectedId = ref(null)
@@ -715,7 +729,7 @@ function getStatus(challenge) {
   }
 
   return new Date(challenge.published_at).getTime()
-    > Date.now()
+    > publicationClock.value
     ? 'scheduled'
     : 'published'
 }
@@ -784,7 +798,10 @@ async function loadChallenges() {
     const { data, error, count } = await supabase
       .from('daily_challenges')
       .select(
-        'id, challenge_date, published_at',
+        `id, challenge_date, published_at,
+          items:daily_challenge_questions (
+            question:questions (is_active)
+          )`,
         { count: 'exact' }
       )
       .order('challenge_date', {
@@ -872,6 +889,19 @@ async function loadQuestions(challengeId) {
 
     selectedQuestions.value =
       (data || []).filter(item => item.question)
+
+    // Osvježi broj pitanja i na zatvorenoj kartici.
+    const challenge = challenges.value.find(
+      item => item.id === challengeId
+    )
+
+    if (challenge) {
+      challenge.items = (data || []).map(item => ({
+        question: item.question
+          ? { is_active: item.question.is_active }
+          : null,
+      }))
+    }
 
   } catch (error) {
     if (request === questionRequest) {
@@ -1129,6 +1159,35 @@ async function onChallengeChanged(result) {
 }
 
 
+async function onPublicationChanged(result) {
+  if (!adminStore.isAdmin) return
+
+  const userId = authStore.userId
+  const openId = selectedId.value
+  const messages = {
+    publish_now: 'Današnji izazov je objavljen.',
+    schedule: 'Objava izazova uspješno je zakazana.',
+    cancel: 'Izazov je ponovno spremljen kao nacrt.',
+  }
+
+  publicationClock.value = Date.now()
+  notify(messages[result.action] || 'Objava je spremljena.')
+
+  const reload = loadChallenges()
+  const request = challengeRequest
+  await reload
+
+  if (
+    request !== challengeRequest ||
+    !adminStore.isAdmin ||
+    authStore.userId !== userId ||
+    selectedId.value !== null
+  ) return
+
+  const openChallenge = challenges.value.find(item => item.id === openId)
+  if (openChallenge) await loadQuestions(openChallenge.id)
+}
+
 async function onCalendarSelect(day) {
   if (
     !adminStore.isAdmin ||
@@ -1292,7 +1351,21 @@ watch(
   { immediate: true }
 )
 
+onMounted(() => {
+  publicationInterval = window.setInterval(() => {
+    publicationClock.value = Date.now()
+    const newToday = todayDate()
+    if (today.value !== newToday) {
+      today.value = newToday
+      calendarVersion.value++
+    }
+  }, 1000)
+})
+
 onBeforeUnmount(() => {
+  if (publicationInterval !== null) {
+    window.clearInterval(publicationInterval)
+  }
   challengeRequest++
   questionRequest++
   createRequest++
