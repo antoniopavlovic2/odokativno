@@ -1,12 +1,13 @@
+
 <template>
   <header class="site-header">
     <v-container class="header-container">
       <router-link
         to="/"
         class="brand"
-        aria-label="Odokativno – početna stranica"
+        aria-label="Otprilike – početna stranica"
       >
-        ODOKATIVNO<span>.</span>
+        OTPRILIKE<span>.</span>
       </router-link>
 
       <!-- Desktop navigacija -->
@@ -38,72 +39,72 @@
         </v-btn>
 
         <v-btn
-          :icon="
-            settingsStore.soundEnabled
-              ? 'mdi-volume-high'
-              : 'mdi-volume-off'
-          "
-          :aria-label="
-            settingsStore.soundEnabled
-              ? 'Isključi zvuk'
-              : 'Uključi zvuk'
-          "
-          :title="
-            settingsStore.soundEnabled
-              ? 'Isključi zvuk'
-              : 'Uključi zvuk'
-          "
+          :icon="soundIcon"
+          :aria-label="soundLabel"
+          :title="soundLabel"
           variant="text"
           @click="settingsStore.toggleSound()"
         />
 
         <v-divider vertical class="mx-2" />
 
-        <v-btn
-          to="/prijava"
-          variant="outlined"
-          class="auth-button"
-        >
-          Prijava
-        </v-btn>
+        <template v-if="authStore.initialized">
+          <v-btn
+            v-if="authStore.isRecovery"
+            to="/nova-lozinka"
+            color="primary"
+          >
+            Nova lozinka
+          </v-btn>
 
-        <v-btn
-          to="/registracija"
-          color="primary"
-          elevation="0"
-          class="auth-button font-weight-bold"
-        >
-          Registracija
-        </v-btn>
+          <v-btn
+            v-else-if="authStore.isAuthenticated"
+            to="/profil"
+            color="primary"
+            elevation="0"
+            prepend-icon="mdi-account-circle-outline"
+            class="auth-button font-weight-bold"
+          >
+            Moj profil
+          </v-btn>
+
+          <template v-else>
+            <v-btn
+              to="/prijava"
+              variant="outlined"
+              class="auth-button"
+            >
+              Prijava
+            </v-btn>
+
+            <v-btn
+              to="/registracija"
+              color="primary"
+              elevation="0"
+              class="auth-button font-weight-bold"
+            >
+              Registracija
+            </v-btn>
+          </template>
+        </template>
       </nav>
 
       <!-- Mobilna navigacija -->
       <div class="d-flex d-lg-none">
         <v-btn
-          :icon="
-            settingsStore.soundEnabled
-              ? 'mdi-volume-high'
-              : 'mdi-volume-off'
-          "
-          :aria-label="
-            settingsStore.soundEnabled
-              ? 'Isključi zvuk'
-              : 'Uključi zvuk'
-          "
-          :title="
-            settingsStore.soundEnabled
-              ? 'Isključi zvuk'
-              : 'Uključi zvuk'
-          "
+          :icon="soundIcon"
+          :aria-label="soundLabel"
+          :title="soundLabel"
           variant="text"
           @click="settingsStore.toggleSound()"
         />
 
         <v-btn
-          to="/prijava"
-          icon="mdi-account-outline"
+          v-if="authStore.initialized"
+          :to="accountRoute"
+          :icon="accountIcon"
+          :aria-label="accountLabel"
           variant="text"
-          aria-label="Prijava"
         />
 
         <v-btn
@@ -124,7 +125,7 @@
     width="300"
   >
     <div class="drawer-header">
-      <span class="brand">ODOKATIVNO.</span>
+      <span class="brand">OTPRILIKE.</span>
 
       <v-btn
         icon="mdi-close"
@@ -161,41 +162,97 @@
         title="Moja statistika"
         @click="openDialog('statistics')"
       />
+
+      <v-list-item
+        v-if="
+          authStore.initialized &&
+          authStore.isAuthenticated &&
+          !authStore.isRecovery
+        "
+        to="/profil"
+        prepend-icon="mdi-account-circle-outline"
+        title="Moj profil"
+        @click="menu = false"
+      />
     </v-list>
 
     <v-divider />
 
-    <div class="pa-4">
+    <div
+      v-if="authStore.initialized"
+      class="pa-4"
+    >
       <v-btn
-        to="/prijava"
-        block
-        variant="outlined"
-        height="46"
-        class="mb-3"
-        @click="menu = false"
-      >
-        Prijava
-      </v-btn>
-
-      <v-btn
-        to="/registracija"
+        v-if="authStore.isRecovery"
+        to="/nova-lozinka"
         block
         color="primary"
-        elevation="0"
         height="46"
         @click="menu = false"
       >
-        Registracija
+        Nova lozinka
       </v-btn>
+
+      <template v-else-if="authStore.isAuthenticated">
+        <div class="drawer-account mb-4">
+          <v-icon
+            icon="mdi-account-circle-outline"
+            size="30"
+          />
+
+          <div class="account-details">
+            <strong>Prijavljen si</strong>
+            <span>{{ authStore.email }}</span>
+          </div>
+        </div>
+
+        <v-btn
+          block
+          color="primary"
+          elevation="0"
+          height="46"
+          to="/profil"
+          @click="menu = false"
+        >
+          Moj profil
+        </v-btn>
+      </template>
+
+      <template v-else>
+        <v-btn
+          to="/prijava"
+          block
+          variant="outlined"
+          height="46"
+          class="mb-3"
+          @click="menu = false"
+        >
+          Prijava
+        </v-btn>
+
+        <v-btn
+          to="/registracija"
+          block
+          color="primary"
+          elevation="0"
+          height="46"
+          @click="menu = false"
+        >
+          Registracija
+        </v-btn>
+      </template>
     </div>
   </v-navigation-drawer>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const settingsStore = useSettingsStore()
+const authStore = useAuthStore()
 
 const menu = ref(false)
 
@@ -204,6 +261,48 @@ const emit = defineEmits([
   'leaderboard',
   'statistics',
 ])
+
+const soundIcon = computed(() =>
+  settingsStore.soundEnabled
+    ? 'mdi-volume-high'
+    : 'mdi-volume-off'
+)
+
+const soundLabel = computed(() =>
+  settingsStore.soundEnabled
+    ? 'Isključi zvuk'
+    : 'Uključi zvuk'
+)
+
+const accountRoute = computed(() => {
+  if (authStore.isRecovery) {
+    return '/nova-lozinka'
+  }
+
+  return authStore.isAuthenticated
+    ? '/profil'
+    : '/prijava'
+})
+
+const accountIcon = computed(() => {
+  if (authStore.isRecovery) {
+    return 'mdi-lock-outline'
+  }
+
+  return authStore.isAuthenticated
+    ? 'mdi-account-circle'
+    : 'mdi-account-outline'
+})
+
+const accountLabel = computed(() => {
+  if (authStore.isRecovery) {
+    return 'Nova lozinka'
+  }
+
+  return authStore.isAuthenticated
+    ? 'Moj profil'
+    : 'Prijava'
+})
 
 function openDialog(dialog) {
   menu.value = false
@@ -264,6 +363,32 @@ function openDialog(dialog) {
 
 .drawer-header .brand {
   font-size: 18px;
+}
+
+.drawer-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f6ed;
+  border: 1px solid rgba(24, 24, 24, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.account-details strong {
+  font-size: 14px;
+}
+
+.account-details span {
+  font-size: 12px;
+  color: #64635d;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 599px) {

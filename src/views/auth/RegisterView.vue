@@ -1,11 +1,67 @@
 
 <template>
   <AuthLayout
-    title="Imaš dobro oko?"
-    subtitle="Kreiraj račun i pokaži koliko dobro procjenjuješ."
+    :title="
+      registrationComplete
+        ? 'Provjeri svoj e-mail!'
+        : 'Imaš dobro oko?'
+    "
+    :subtitle="
+      registrationComplete
+        ? 'Još samo jedan korak.'
+        : 'Kreiraj račun i pokaži koliko dobro procjenjuješ.'
+    "
   >
-    <v-form @submit.prevent="submitRegister">
+    <div
+      v-if="registrationComplete"
+      class="text-center"
+    >
+      <div class="email-icon">
+        <v-icon
+          icon="mdi-email-check-outline"
+          size="40"
+        />
+      </div>
 
+      <h2 class="mb-4">
+        Potvrdi svoj račun
+      </h2>
+
+      <p class="text-body-2 mb-3">
+        Provjeri pristiglu poštu na adresi:
+      </p>
+
+      <strong class="registered-email">
+        {{ email }}
+      </strong>
+
+      <p class="text-body-2 my-5">
+        Otvori poveznicu iz e-maila.
+        Nakon potvrde prijavi se ili otvori
+        Moj profil kako bi dovršio registraciju.
+      </p>
+
+      <p class="text-caption mb-5">
+        Ako ne vidiš poruku, provjeri
+        neželjenu poštu.
+      </p>
+
+      <v-btn
+        block
+        color="primary"
+        height="52"
+        elevation="0"
+        class="font-weight-bold"
+        to="/prijava"
+      >
+        POVRATAK NA PRIJAVU
+      </v-btn>
+    </div>
+
+    <v-form
+      v-else
+      @submit.prevent="submitRegister"
+    >
       <v-text-field
         v-model.trim="username"
         label="Korisničko ime"
@@ -14,7 +70,7 @@
         prepend-inner-icon="mdi-account-outline"
         variant="outlined"
         :rules="[rules.required, rules.username]"
-        hint="Ime koje će biti prikazano na rang-listi."
+        hint="Dostupnost imena potvrđujemo nakon potvrde e-maila."
         class="mb-2"
       />
 
@@ -62,18 +118,20 @@
         variant="outlined"
         :rules="[
           rules.required,
-          value => value === password || 'Lozinke se ne podudaraju.'
+          value =>
+            value === password ||
+            'Lozinke se ne podudaraju.'
         ]"
         class="mb-2"
       />
 
       <v-alert
-        v-if="authStore.error"
-        type="info"
+        v-if="authStore.errorMessage"
+        type="error"
         variant="tonal"
         class="mb-4"
       >
-        {{ authStore.error }}
+        {{ authStore.errorMessage }}
       </v-alert>
 
       <v-btn
@@ -87,13 +145,15 @@
       >
         KREIRAJ RAČUN
       </v-btn>
-
     </v-form>
 
     <template #bottom>
       Već imaš račun?
 
-      <router-link to="/prijava" class="auth-link">
+      <router-link
+        to="/prijava"
+        class="auth-link"
+      >
         Prijavi se
       </router-link>
     </template>
@@ -102,10 +162,13 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { rules } from '@/utils/validation'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 const username = ref('')
@@ -113,6 +176,7 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
+const registrationComplete = ref(false)
 
 authStore.clearError()
 
@@ -121,10 +185,42 @@ async function submitRegister(event) {
 
   if (!valid) return
 
-  await authStore.register(
+  const success = await authStore.register(
     username.value,
     email.value,
     password.value
   )
+
+  if (!success) return
+
+  password.value = ''
+  confirmPassword.value = ''
+
+  if (authStore.isAuthenticated) {
+    router.replace({ name: 'profile' })
+    return
+  }
+
+  registrationComplete.value = true
 }
 </script>
+
+<style scoped>
+.email-icon {
+  width: 80px;
+  height: 80px;
+  background: #facc15;
+  border: 2px solid #181818;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.registered-email {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+}
+</style>

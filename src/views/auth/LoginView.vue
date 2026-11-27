@@ -5,7 +5,6 @@
     subtitle="Prijavi se i nastavi tamo gdje si stao."
   >
     <v-form @submit.prevent="submitLogin">
-
       <v-text-field
         v-model.trim="email"
         label="E-mail adresa"
@@ -49,12 +48,12 @@
       </div>
 
       <v-alert
-        v-if="authStore.error"
-        type="info"
+        v-if="authStore.errorMessage"
+        type="error"
         variant="tonal"
         class="mb-4"
       >
-        {{ authStore.error }}
+        {{ authStore.errorMessage }}
       </v-alert>
 
       <v-btn
@@ -68,13 +67,15 @@
       >
         PRIJAVI SE
       </v-btn>
-
     </v-form>
 
     <template #bottom>
       Nemaš račun?
 
-      <router-link to="/registracija" class="auth-link">
+      <router-link
+        to="/registracija"
+        class="auth-link"
+      >
         Registriraj se
       </router-link>
     </template>
@@ -83,10 +84,13 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { rules } from '@/utils/validation'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 const email = ref('')
@@ -100,6 +104,17 @@ async function submitLogin(event) {
 
   if (!valid) return
 
-  await authStore.login(email.value, password.value)
+  const success = await authStore.login(
+    email.value,
+    password.value
+  )
+
+  if (success) {
+    password.value = ''
+
+    router.replace({
+      name: 'profile',
+    })
+  }
 }
 </script>

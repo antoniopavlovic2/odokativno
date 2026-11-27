@@ -7,6 +7,7 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useAuthStore } from '@/stores/authStore'
 
 import '@fontsource/space-grotesk/400.css'
 import '@fontsource/space-grotesk/500.css'
@@ -18,11 +19,17 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(vuetify)
+
+// Autentifikacija
+const authStore = useAuthStore(pinia)
+
+authStore.initialize()
+
 app.use(router)
 
+// Zvučni efekti
 const settingsStore = useSettingsStore(pinia)
 
-// Aktivacija zvuka nakon korisničkog klika.
 window.addEventListener(
   'click',
   () => {
