@@ -39,6 +39,11 @@ const routes = [
       robots: 'noindex, follow',
     },
   },
+
+  // =========================================
+  // AUTENTIFIKACIJA
+  // =========================================
+
   {
     path: '/prijava',
     name: 'login',
@@ -95,6 +100,22 @@ const routes = [
     },
   },
   {
+    path: '/brisanje-racuna',
+    name: 'delete-account',
+    component: () =>
+      import('@/views/auth/DeleteAccountView.vue'),
+    meta: {
+      title: 'Brisanje računa | Odokativno',
+      description: 'Upravljaj brisanjem svojeg Odokativno računa.',
+      robots: 'noindex, follow',
+    },
+  },
+
+  // =========================================
+  // PRAVNI DOKUMENTI
+  // =========================================
+
+  {
     path: '/politika-privatnosti',
     name: 'privacy',
     component: () =>
@@ -116,22 +137,36 @@ const routes = [
       robots: 'index, follow',
     },
   },
+
+  // =========================================
+  // ADMINISTRACIJA
+  // =========================================
+
   {
-    path: '/brisanje-racuna',
-    name: 'delete-account',
+    path: '/admin',
+    name: 'admin',
     component: () =>
-      import('@/views/auth/DeleteAccountView.vue'),
+      import('@/views/admin/AdminDashboardView.vue'),
     meta: {
-      title: 'Brisanje računa | Odokativno',
-      description: 'Upravljaj brisanjem svojeg Odokativno računa.',
-      robots: 'noindex, follow',
+      title: 'Administracija | Odokativno',
+      description: 'Administratorsko sučelje dnevnog kviza Odokativno.',
+      robots: 'noindex, nofollow',
     },
   },
+
+  // =========================================
+  // NEPOSTOJEĆE STRANICE
+  // =========================================
+
   {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
 ]
+
+// =========================================
+// VUE ROUTER
+// =========================================
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
@@ -141,6 +176,10 @@ const router = createRouter({
     return savedPosition || { top: 0 }
   },
 })
+
+// =========================================
+// SEO META PODACI
+// =========================================
 
 function setMeta(name, content) {
   let tag = document.querySelector(

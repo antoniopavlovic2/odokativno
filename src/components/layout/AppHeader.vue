@@ -5,9 +5,9 @@
       <router-link
         to="/"
         class="brand"
-        aria-label="Otprilike – početna stranica"
+        aria-label="Odokativno – početna stranica"
       >
-        OTPRILIKE<span>.</span>
+        ODOKATIVNO<span>.</span>
       </router-link>
 
       <!-- Desktop navigacija -->
@@ -49,6 +49,10 @@
         <v-divider vertical class="mx-2" />
 
         <template v-if="authStore.initialized">
+
+          <!-- Administratorski pristup -->
+          <AdminAccessButton />
+
           <v-btn
             v-if="authStore.isRecovery"
             to="/nova-lozinka"
@@ -125,7 +129,9 @@
     width="300"
   >
     <div class="drawer-header">
-      <span class="brand">OTPRILIKE.</span>
+      <span class="brand">
+        ODOKATIVNO<span>.</span>
+      </span>
 
       <v-btn
         icon="mdi-close"
@@ -174,6 +180,16 @@
         title="Moj profil"
         @click="menu = false"
       />
+
+      <!-- Administracija u mobilnom izborniku -->
+      <v-list-item
+        v-if="adminStore.isAdmin"
+        :to="{ name: 'admin' }"
+        prepend-icon="mdi-shield-account"
+        title="Administracija"
+        class="admin-menu-item"
+        @click="menu = false"
+      />
     </v-list>
 
     <v-divider />
@@ -203,6 +219,17 @@
           <div class="account-details">
             <strong>Prijavljen si</strong>
             <span>{{ authStore.email }}</span>
+
+            <div
+              v-if="adminStore.isAdmin"
+              class="admin-account-badge"
+            >
+              <v-icon size="14">
+                mdi-shield-check
+              </v-icon>
+
+              Administrator
+            </div>
           </div>
         </div>
 
@@ -246,13 +273,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useAdminStore } from '@/stores/adminStore'
+
+import AdminAccessButton from '@/components/admin/AdminAccessButton.vue'
 
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
+const adminStore = useAdminStore()
+
+const route = useRoute()
 
 const menu = ref(false)
 
@@ -304,6 +338,16 @@ const accountLabel = computed(() => {
     : 'Prijava'
 })
 
+// Zatvaranje mobilnog izbornika
+// prilikom promjene stranice.
+
+watch(
+  () => route.path,
+  () => {
+    menu.value = false
+  }
+)
+
 function openDialog(dialog) {
   menu.value = false
   emit(dialog)
@@ -322,6 +366,7 @@ function openDialog(dialog) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding-left: 24px;
   padding-right: 24px;
 }
@@ -333,6 +378,7 @@ function openDialog(dialog) {
   font-weight: 700;
   letter-spacing: -1.2px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .brand span {
@@ -353,6 +399,8 @@ function openDialog(dialog) {
 .auth-button {
   border-radius: 8px;
 }
+
+/* Mobilni izbornik */
 
 .drawer-header {
   display: flex;
@@ -391,11 +439,52 @@ function openDialog(dialog) {
   overflow-wrap: anywhere;
 }
 
+/* Administratorske oznake */
+
+.admin-menu-item {
+  background: #181818;
+  color: #facc15 !important;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.admin-menu-item :deep(.v-icon) {
+  color: #facc15;
+}
+
+.admin-account-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 5px;
+  background: #facc15;
+  color: #181818;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* Responsive */
+
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .desktop-nav {
+    gap: 4px;
+  }
+
+  .desktop-nav :deep(.v-btn) {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 @media (max-width: 599px) {
   .header-container {
     min-height: 64px;
     padding-left: 20px;
     padding-right: 12px;
+    gap: 8px;
   }
 
   .brand {
