@@ -171,6 +171,17 @@ const routes = [
   },
 
   {
+  path: '/statistika',
+  name: 'statistics',
+  component: () => import('@/views/StatisticsView.vue'),
+  meta: {
+    title: 'Moja statistika | ODOKATIVNO.',
+    description: 'Osobna statistika i tjedni napredak igrača.',
+    robots: 'noindex, nofollow',
+  },
+  },
+
+  {
   path: '/novcanik',
   name: 'wallet',
   component: () => import('@/views/WalletView.vue'),
@@ -179,6 +190,7 @@ const routes = [
     description: 'Pregled O-Coinsa, nagrada i transakcija.',
     robots: 'noindex, nofollow',
   },
+  
 },
 
   // =========================================

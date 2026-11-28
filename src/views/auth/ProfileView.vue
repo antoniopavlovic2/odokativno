@@ -318,48 +318,11 @@
 
           <!-- STATISTIKA -->
 
-          <section class="feature-card">
+          <!-- STATISTIKA I TJEDNI STREAK -->
 
-            <div class="feature-heading">
+<PlayerStatistics compact />
 
-              <div class="feature-icon">
-                <v-icon size="25">
-                  mdi-chart-bar
-                </v-icon>
-              </div>
-
-              <div>
-                <h2>Moja statistika.</h2>
-                <p>Tvoji rezultati na jednom mjestu.</p>
-              </div>
-
-            </div>
-
-            <div class="statistics-grid">
-
-              <div
-                v-for="item in statistics"
-                :key="item.label"
-                class="statistic-tile"
-              >
-
-                <v-icon size="20">
-                  {{ item.icon }}
-                </v-icon>
-
-                <strong>—</strong>
-
-                <span>{{ item.label }}</span>
-
-              </div>
-
-            </div>
-
-            <div class="coming-soon">
-              Statistika stiže uskoro.
-            </div>
-
-          </section>
+<!-- KOLEKCIJA -->
 
           <!-- KOLEKCIJA -->
 
@@ -623,6 +586,9 @@ import CoinIcon
 import AdminXPTools
   from '@/components/admin/AdminXPTools.vue'
 
+  import PlayerStatistics
+  from '@/components/statistics/PlayerStatistics.vue'
+
 const router = useRouter()
 
 const authStore = useAuthStore()
@@ -710,30 +676,6 @@ const memberSince = computed(() => {
 // =========================================
 // BUDUĆA STATISTIKA I KOLEKCIJA
 // =========================================
-
-const statistics = [
-
-  {
-    label: 'Odigrani izazovi',
-    icon: 'mdi-gamepad-variant-outline',
-  },
-
-  {
-    label: 'Točnost odgovora',
-    icon: 'mdi-target',
-  },
-
-  {
-    label: 'Najbolji rezultat',
-    icon: 'mdi-trophy-outline',
-  },
-
-  {
-    label: 'Trenutni streak',
-    icon: 'mdi-fire',
-  },
-
-]
 
 const collection = [
 
