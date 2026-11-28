@@ -9,6 +9,10 @@ import vuetify from './plugins/vuetify'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useAuthStore } from '@/stores/authStore'
 
+import {
+  unlockRewardSound,
+} from '@/services/rewardSoundService'
+
 import '@fontsource/space-grotesk/400.css'
 import '@fontsource/space-grotesk/500.css'
 import '@fontsource/space-grotesk/600.css'
@@ -35,6 +39,7 @@ window.addEventListener(
   () => {
     if (settingsStore.soundEnabled) {
       settingsStore.unlockSound()
+      unlockRewardSound()
     }
   },
   { capture: true }

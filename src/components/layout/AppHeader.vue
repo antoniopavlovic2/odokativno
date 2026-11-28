@@ -37,6 +37,8 @@
         >
           Statistika
         </v-btn>
+        
+        <WalletBalance class="d-none d-md-inline-flex" />
 
         <v-btn
           :icon="soundIcon"
@@ -94,6 +96,8 @@
       </nav>
 
       <!-- Mobilna navigacija -->
+      <WalletBalance class="d-md-none" />
+
       <div class="d-flex d-lg-none">
         <v-btn
           :icon="soundIcon"
@@ -281,6 +285,9 @@ import { useAuthStore } from '@/stores/authStore'
 import { useAdminStore } from '@/stores/adminStore'
 
 import AdminAccessButton from '@/components/admin/AdminAccessButton.vue'
+
+import WalletBalance
+  from '@/components/wallet/WalletBalance.vue'
 
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()

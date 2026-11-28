@@ -123,6 +123,10 @@
       </v-container>
     </section>
 
+        <!-- NAPREDAK IGRAČA -->
+
+    <PlayerProgressCard compact />
+
     <section class="features-section" aria-label="Značajke igre">
       <v-container class="content-container">
         <v-row>
@@ -197,6 +201,9 @@ import { useSettingsStore } from '@/stores/settingsStore'
 import { getTodayDate } from '@/utils/date'
 
 import logo from '@/assets/logo.svg'
+
+import PlayerProgressCard
+  from '@/components/progression/PlayerProgressCard.vue'
 
 const emit = defineEmits(['rules'])
 

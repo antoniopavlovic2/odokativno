@@ -170,6 +170,17 @@ const routes = [
     },
   },
 
+  {
+  path: '/novcanik',
+  name: 'wallet',
+  component: () => import('@/views/WalletView.vue'),
+  meta: {
+    title: 'Moj novčanik | ODOKATIVNO.',
+    description: 'Pregled O-Coinsa, nagrada i transakcija.',
+    robots: 'noindex, nofollow',
+  },
+},
+
   // =========================================
   // NEPOSTOJEĆE STRANICE
   // =========================================

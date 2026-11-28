@@ -185,6 +185,10 @@
         </v-expansion-panels>
       </section>
 
+            <!-- XP I LEVEL NAGRADE -->
+
+      <GameRewards />
+
       <div class="results-actions">
         <v-btn
           block
@@ -261,6 +265,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useGameStore } from '@/stores/gameStore'
+
+import GameRewards
+  from '@/components/progression/GameRewards.vue'
 
 const router = useRouter()
 const gameStore = useGameStore()

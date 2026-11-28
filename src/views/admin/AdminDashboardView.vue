@@ -110,6 +110,10 @@
         </div>
       </div>
 
+      <!-- DEVELOPER TOOLS -->
+
+      <AdminDeveloperTools />
+
       <!-- STATISTIKA -->
 
       <div class="summary-card">
@@ -619,6 +623,9 @@ import AdminChallengeCalendar
 
 import AdminChallengePublish
   from '@/components/admin/AdminChallengePublish.vue'
+
+import AdminDeveloperTools
+  from '@/components/admin/AdminDeveloperTools.vue'
 
 const authStore = useAuthStore()
 const adminStore = useAdminStore()
